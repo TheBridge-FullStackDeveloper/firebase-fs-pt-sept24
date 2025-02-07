@@ -7,14 +7,28 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import db from "../config/firebase.config";
+import { db, auth } from "../config/firebase.config";
 import { useState } from "react";
+import { signOut } from "firebase/auth";
 import UserForm from "./UserForm";
+import { useNavigate } from "react-router";
+
+const logout = (navigate) => {
+  signOut(auth)
+    .then(() => {
+      console.log("User signed out successfully");
+      navigate("/register");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
+};
 
 const Users = () => {
   const queryClient = useQueryClient();
   const [isFormOpen, setFormOpen] = useState(false);
   const [userToUpdate, setUserToUpdate] = useState({});
+  const navigate = useNavigate();
 
   const { mutate: mutateUpdateUser } = useMutation({
     mutationFn: (payload) =>
@@ -54,6 +68,7 @@ const Users = () => {
 
   return (
     <>
+      <button onClick={() => logout(navigate)}>Logout</button>
       {/* Add form */}
       <UserForm
         isFormOpen={!isFormOpen}
@@ -68,7 +83,9 @@ const Users = () => {
           onClick={() => {
             setFormOpen(false);
           }}
-        >Close Form</button>
+        >
+          Close Form
+        </button>
         <UserForm
           isFormOpen={isFormOpen}
           onSubmit={(data) => {
